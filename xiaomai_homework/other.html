@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    @font-face {
+      font-family: 'Oradano Mincho';
+      src: url('font/OradanoGSRR.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+    :root {
+      --bg-color: #000000;
+      --text-color: #ffffff;
+      --accent-bg: #000000;
+      --nav-bg: #f1ece2;
+    }
+    body {
+      margin: 0;
+      font-family: "Noto Sans TC", sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      line-height: 1.8;
+      transition: background-color 0.3s, color 0.3s;
+      scroll-behavior: smooth;
+    }
+    footer .social-icon {
+      height: 30px;
+      width: auto;
+      vertical-align: middle;
+    }
+
+    #cover-screen {
+      position: relative;
+      min-height: 100vh;
+      background-color: transparent;
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 2;
+      padding: 2rem;
+      user-select: none;
+      text-align: center;
+    }
+    #cover-screen h1 {
+      font-family: 'Oradano Mincho', serif;
+      font-size: 6em;
+      color: #e2e2e2;
+      margin: 0;
+    }
+    .scroll-hint {
+      margin-top: 1rem;
+      font-size: 1.2rem;
+      opacity: 0.7;
+      cursor: pointer;
+      animation: bounce 2s infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(10px); }
+    }
+
+    .video-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: -1;
+    }
+    .video-background video {
+      min-width: 100%;
+      min-height: 100%;
+      object-fit: cover;
+      filter: brightness(1);
+    }
+    .video-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.65);
+      transition: background-color 0.3s ease;
+      z-index: 1;
+    }
+
+    #intro-tagline {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: transparent;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 1s ease-out, transform 1s ease-out;
+      will-change: opacity, transform;
+      pointer-events: none;
+    }
+    #intro-tagline.visible {
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+    }
+    .tagline-content h2 {
+      font-size: 3rem;
+      color: var(--text-color);
+      font-weight: 500;
+      margin: 0;
+      font-family: "Noto Sans TC", sans-serif;
+    }
+
+    main {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    section {
+      margin-bottom: 3rem;
+    }
+
+    .members {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+    }
+    .member {
+      width: 180px;
+      text-align: center;
+      position: relative;
+      cursor: pointer;
+    }
+    .member img,
+    .member video {
+      width: 100%;
+      border-radius: 10px;
+      display: block;
+    }
+    .member video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      pointer-events: none;
+    }
+    .member:hover video {
+      opacity: 1;
+    }
+    .member:hover img {
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: 0.9rem;
+      background-color: var(--accent-bg);
+      color: var(--text-color);
+    }
+    footer hr {
+      border: none;
+      height: 1px;
+      background-color: var(--text-color);
+      margin-bottom: 1rem;
+      opacity: 0.3;
+    }
+    footer a {
+      color: var(--text-color);
+      text-decoration: none;
+    }
+
+    .toggle-mode {
+      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 0.4rem 0.8rem;
+      background: transparent;
+      border: 1px solid var(--text-color);
+      border-radius: 5px;
+      color: var(--text-color);
+      transition: background 0.3s, color 0.3s;
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 10;
+    }
+    .toggle-mode:hover {
+      background: var(--text-color);
+      color: var(--bg-color);
+    }
+
+    @media (max-width: 600px) {
+      .member {
+        width: 100%;
+      }
+    }
+
+    .fade-in-section {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 1s ease-out, transform 1s ease-out;
+      will-change: opacity, transform;
+    }
+    .fade-in-section.visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    #music-toggle {
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      background: rgba(255, 255, 255, 0);
+      font-size: 1.5rem;
+      padding: 0.5rem 0.8rem;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 20;
+      transition: background 0.3s, transform 0.2s;
+    }
+    #music-toggle:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: scale(1.1);
+    }
+
+    #my-video {
+      max-width: 100%;
+      width: 1220px;
+      height: auto;
+      display: block;
+      margin: 0 auto; 
+      border-radius: 5px;
+    }
+
+
+  </style>
+</head>
+<body>
+  <audio id="bg-music" autoplay loop>
+    <source src="music/wow.mp3" type="audio/mp3">
+    您的瀏覽器不支援音訊播放。
+  </audio>
+
+  <button id="music-toggle" title="切換音樂">
+    🎵
+  </button>
+
+
+  <div id="cover-screen">
+    <h1>舊17時代</h1>
+    <p class="scroll-hint" id="scrollHint">往下滑開始探索<br>▼</p>
+  </div>
+
+  <div class="video-background">
+    <video autoplay muted loop playsinline>
+      <source src="videos/hi.mp4" type="video/mp4" />
+      您的瀏覽器不支援影片播放。
+    </video>
+    <div class="video-overlay"></div>
+  </div>
+
+  <section id="intro-tagline" class="fade-in-section">
+    <div class="tagline-content">
+      <h2>"一群資科系的麻瓜"</h2>
+    </div>
+  </section>
+
+  <main>
+    <section id="video" class="fade-in-section">
+      <h2>影音片段</h2>
+      <video id="my-video" controls>
+        <source src="videos/hi.mp4" type="video/mp4" />
+      </video>
+    </section>
+
+    <section id="members" class="fade-in-section">
+      <h2>成員介紹</h2>
+      <div class="members">
+        <div class="member">
+          <img src="pictures/wu.jpg" alt="成員1" />
+          <video muted loop preload="metadata">
+            <source src="videos/wu.mp4" type="video/mp4" />
+          </video>
+          <p>沁<br><br>今天午餐吃什麼</p>
+        </div>
+        <div class="member">
+          <img src="pictures/lian.jpg" alt="成員2" />
+          <video muted loop preload="metadata">
+            <source src="videos/lian.mp4" type="video/mp4" />
+          </video>
+          <p>紳士終結者<br><br>豬大哥沒有死！</p>
+        </div>
+        <div class="member">
+          <img src="pictures/haung.jpg" alt="成員3" />
+          <video muted loop preload="metadata">
+            <source src="videos/huang.mp4" type="video/mp4" />
+          </video>
+          <p>破防帥潮<br><br>我這禮拜剩500</p>
+        </div>
+        <div class="member">
+          <img src="pictures/lin.jpg" alt="成員4" />
+          <video muted loop preload="metadata">
+            <source src="videos/lin.mp4" type="video/mp4" />
+          </video>
+          <p>不知道<br><br>社..恐...</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <hr />
+    
+    <a href="https://www.facebook.com/mei.kao.shang.jiang.liao" target="_blank">
+        <img src="pictures/fb.png" alt="Facebook" class="social-icon" />
+    </a>
+    <a href="https://www.instagram.com/ccccccs_no_l_/" target="_blank">
+        <img src="pictures/ins.png" alt="Facebook" class="social-icon" />
+    </a>
+    <p>© 2025 小麥出品</p>
+  </footer>
+
+  <script>
+    // 成員影片
+    document.querySelectorAll('.member').forEach(member => {
+      const video = member.querySelector('video');
+      member.addEventListener('mouseenter', () => {
+        video.currentTime = 0;
+        video.play();
+      });
+      member.addEventListener('mouseleave', () => {
+        video.pause();
+        video.currentTime = 0;
+      });
+    });
+
+    // 背景遮罩
+    window.addEventListener('scroll', () => {
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollRatio = Math.min(scrollTop / docHeight, 1);
+      const overlay = document.querySelector('.video-overlay');
+      const baseOpacity = 0.65;
+      const maxOpacity = 1;
+      const opacity = baseOpacity + scrollRatio * (maxOpacity - baseOpacity);
+      overlay.style.backgroundColor = `rgba(0, 0, 0, ${opacity})`;
+    });
+
+    // 下滑提示
+    document.getElementById('scrollHint').addEventListener('click', () => {
+      document.querySelector('main').scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // 區塊淡入
+    const faders = document.querySelectorAll('.fade-in-section');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        } else {
+          entry.target.classList.remove('visible');
+        }
+      });
+    }, {
+      threshold: 0.1
+    });
+    faders.forEach(section => observer.observe(section));
+
+    // 背景音樂控制
+    const bgMusic = document.getElementById('bg-music');
+    const video = document.getElementById('my-video');
+    const toggle = document.getElementById('music-toggle');
+
+    // 按鈕切換音樂播放與暫停
+    toggle.addEventListener('click', () => {
+        if (bgMusic.paused) {
+        bgMusic.play();
+        toggle.textContent = '🎵';
+        } else {
+        bgMusic.pause();
+        toggle.textContent = '🔇';
+        }
+    });
+
+    // 背景音樂 & 影片音效
+    video.addEventListener('play', () => {
+        if (!bgMusic.paused) {
+          bgMusic.pause();
+          toggle.textContent = '🔇';
+        }
+    });
+
+    video.addEventListener('pause', () => {
+        if (bgMusic.start) {
+          bgMusic.play();
+          toggle.textContent = '🎵';
+        }
+    });
+
+    video.addEventListener('ended', () => {
+        if (bgMusic.paused) {
+        bgMusic.play();
+        toggle.textContent = '🎵';
+        }
+    });
+    
+  </script>
+</body>
+</html>
